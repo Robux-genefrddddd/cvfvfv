@@ -296,6 +296,11 @@ export class IPService {
   }
 
   static async getUserIPs(userId: string): Promise<UserIP[]> {
+    if (!userId) {
+      console.warn("getUserIPs called with undefined userId");
+      return [];
+    }
+
     try {
       const q = query(
         collection(db, "user_ips"),
