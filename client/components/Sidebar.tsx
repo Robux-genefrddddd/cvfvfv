@@ -268,6 +268,12 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Settings Modal */}
+      <SettingsModal isOpen={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
+
+      {/* Help Modal */}
+      <HelpModal isOpen={isHelpOpen} onOpenChange={setIsHelpOpen} />
     </>
   );
 }
