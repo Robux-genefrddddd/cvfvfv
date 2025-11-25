@@ -43,7 +43,7 @@ export function ChatArea() {
   const [loading, setLoading] = useState(false);
 
   const handleSend = async () => {
-    if (!message.trim() || !user || !currentConversationId || !userData) return;
+    if (!message.trim() || !user || !userData) return;
 
     // Check message limit
     if (userData.messagesUsed >= userData.messagesLimit) {
@@ -51,25 +51,47 @@ export function ChatArea() {
       return;
     }
 
+    const userMessageText = message;
+    setMessage("");
     setLoading(true);
 
     try {
-      await MessagesService.addMessage(
-        currentConversationId,
-        user.uid,
-        message,
+      // Add user message to chat
+      const userMsg: ChatMessage = {
+        id: Date.now().toString(),
+        role: "user",
+        content: userMessageText,
+        timestamp: Date.now(),
+      };
+      setChatMessages((prev) => [...prev, userMsg]);
+
+      // Get AI response
+      const conversationHistory = chatMessages.map((msg) => ({
+        role: msg.role,
+        content: msg.content,
+      }));
+
+      const aiResponse = await AIService.sendMessage(
+        userMessageText,
+        conversationHistory,
       );
 
-      // Update message count
+      // Add AI response to chat
+      const assistantMsg: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: aiResponse,
+        timestamp: Date.now(),
+      };
+      setChatMessages((prev) => [...prev, assistantMsg]);
+
+      // Update message count in Firebase
       await MessagesService.updateUserMessageCount(
         user.uid,
         userData.messagesUsed + 1,
       );
-
-      setMessage("");
-      toast.success("Message envoyé");
     } catch (error) {
-      toast.error("Erreur lors de l'envoi du message");
+      toast.error(error instanceof Error ? error.message : "Erreur lors de l'envoi");
     } finally {
       setLoading(false);
     }
