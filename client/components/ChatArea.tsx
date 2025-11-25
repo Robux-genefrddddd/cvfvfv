@@ -105,29 +105,62 @@ export function ChatArea() {
   return (
     <div id="chat-area" className="flex-1 flex flex-col bg-background">
       {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto flex items-center justify-center p-6 animate-fadeIn">
-        <div className="text-center">
-          {/* Placeholder for empty state */}
-          <div
-            className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center border-2 border-foreground/20 animate-scaleIn"
-            style={{
-              backgroundImage:
-                "url(https://cdn.builder.io/api/v1/image/assets%2Fafa67d28f8874020a08a6dc1ed05801d%2F340d671f0c4b45db8b30096668d2bc7c)",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "center",
-              backgroundSize: "cover",
-            }}
-          />
-          <h2 className="text-lg font-semibold text-foreground mb-2 animate-slideUp">
-            Commencez une conversation
-          </h2>
-          <p
-            className="text-sm text-foreground/60 animate-slideUp"
-            style={{ animationDelay: "0.1s" }}
-          >
-            Tapez un message ci-dessous pour commencer
-          </p>
-        </div>
+      <div className="flex-1 overflow-y-auto flex flex-col p-6 animate-fadeIn">
+        {chatMessages.length === 0 ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              {/* Placeholder for empty state */}
+              <div
+                className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center border-2 border-foreground/20 animate-scaleIn"
+                style={{
+                  backgroundImage:
+                    "url(https://cdn.builder.io/api/v1/image/assets%2Fafa67d28f8874020a08a6dc1ed05801d%2F340d671f0c4b45db8b30096668d2bc7c)",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "center",
+                  backgroundSize: "cover",
+                }}
+              />
+              <h2 className="text-lg font-semibold text-foreground mb-2 animate-slideUp">
+                Commencez une conversation
+              </h2>
+              <p
+                className="text-sm text-foreground/60 animate-slideUp"
+                style={{ animationDelay: "0.1s" }}
+              >
+                Tapez un message ci-dessous pour commencer
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {chatMessages.map((msg) => (
+              <div
+                key={msg.id}
+                className={`flex ${
+                  msg.role === "user" ? "justify-end" : "justify-start"
+                } animate-slideUp`}
+              >
+                <div
+                  className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${
+                    msg.role === "user"
+                      ? "bg-white/20 text-white rounded-br-none"
+                      : "bg-white/10 text-foreground/90 rounded-bl-none"
+                  }`}
+                >
+                  <p className="text-sm leading-relaxed">{msg.content}</p>
+                </div>
+              </div>
+            ))}
+            {loading && (
+              <div className="flex justify-start animate-slideUp">
+                <div className="bg-white/10 text-foreground/90 px-4 py-3 rounded-lg rounded-bl-none flex items-center gap-2">
+                  <Loader2 size={16} className="animate-spin" />
+                  <span className="text-sm">L'IA répond...</span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Message Input Area */}
