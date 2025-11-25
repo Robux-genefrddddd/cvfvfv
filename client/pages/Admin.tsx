@@ -511,6 +511,9 @@ export default function Admin() {
                           Statut
                         </th>
                         <th className="px-6 py-3 text-left text-sm font-semibold text-foreground/70">
+                          Expire le
+                        </th>
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-foreground/70">
                           Utilisée par
                         </th>
                         <th className="px-6 py-3 text-left text-sm font-semibold text-foreground/70">
@@ -548,6 +551,15 @@ export default function Admin() {
                                 }
                               >
                                 {license.active ? "Active" : "Inactive"}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className="text-foreground/70 text-sm">
+                                {license.expiresAt && !isNaN(license.expiresAt)
+                                  ? new Date(
+                                      license.expiresAt,
+                                    ).toLocaleDateString()
+                                  : "-"}
                               </span>
                             </td>
                             <td className="px-6 py-4">
