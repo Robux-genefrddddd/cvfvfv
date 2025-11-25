@@ -62,17 +62,25 @@ export const handleAIChat: RequestHandler = async (req, res) => {
       },
     );
 
-    const data = await response.json();
+    let data: any;
+    try {
+      data = await response.json();
+    } catch (parseError) {
+      console.error("Failed to parse OpenRouter response:", parseError);
+      return res.status(500).json({
+        error: "Invalid response from AI service",
+      });
+    }
 
     if (!response.ok) {
       console.error("OpenRouter API error:", data);
       return res.status(response.status).json({
-        error: data.error?.message || "OpenRouter API error",
+        error: data?.error?.message || data?.error || "OpenRouter API error",
       });
     }
 
-    const content = data.choices?.[0]?.message?.content || "Pas de réponse";
-    res.json({ content });
+    const content = data?.choices?.[0]?.message?.content || "Pas de réponse";
+    return res.json({ content });
   } catch (error) {
     console.error("AI route error:", error);
     res.status(500).json({
