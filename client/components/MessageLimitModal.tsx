@@ -65,6 +65,12 @@ export function MessageLimitModal({
           </p>
         </div>
       </div>
+
+      {/* License Activation Modal */}
+      <LicenseActivationModal
+        isOpen={showLicenseModal}
+        onClose={() => setShowLicenseModal(false)}
+      />
     </div>
   );
 }
