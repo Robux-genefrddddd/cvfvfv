@@ -1,4 +1,6 @@
 import { RequestHandler } from "express";
+import { db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 interface AIRequest {
   userMessage: string;
@@ -19,7 +21,19 @@ export const handleAIChat: RequestHandler = async (req, res) => {
     systemPrompt,
   } = req.body as AIRequest;
 
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  // Try to get API key from Firebase first, fallback to env variable
+  let apiKey = process.env.OPENROUTER_API_KEY;
+
+  try {
+    const configRef = doc(db, "settings", "ai");
+    const configSnap = await getDoc(configRef);
+
+    if (configSnap.exists() && configSnap.data().apiKey) {
+      apiKey = configSnap.data().apiKey;
+    }
+  } catch (error) {
+    console.error("Failed to fetch API key from Firebase, using env variable:", error);
+  }
 
   if (!apiKey) {
     console.error("OPENROUTER_API_KEY not configured");
