@@ -19,6 +19,7 @@ export interface UserBan {
   bannedAt: Timestamp;
   expiresAt?: Timestamp;
   isPermanent: boolean;
+  type: "ban" | "warn";
 }
 
 export interface MaintenanceNotice {
