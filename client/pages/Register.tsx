@@ -131,8 +131,23 @@ export default function Register() {
       toast.success("Compte créé avec succès!");
       navigate("/");
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Erreur d'inscription";
+      let message = "Erreur d'inscription";
+
+      if (error && typeof error === "object" && "code" in error) {
+        const firebaseError = error as { code: string; message?: string };
+        const errorMap: Record<string, string> = {
+          "auth/email-already-in-use": "Cet email est déjà utilisé",
+          "auth/invalid-email": "Email invalide",
+          "auth/weak-password": "Le mot de passe doit contenir au moins 6 caractères",
+          "auth/operation-not-allowed": "L'inscription n'est pas autorisée",
+          "auth/network-request-failed": "Erreur de connexion réseau. Vérifiez votre connexion internet.",
+        };
+
+        message = errorMap[firebaseError.code] || firebaseError.message || message;
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
+
       toast.error(message);
     } finally {
       setLoading(false);
