@@ -50,8 +50,23 @@ export default function Login() {
       toast.success("Connecté avec succès!");
       navigate("/");
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Erreur de connexion";
+      let message = "Erreur de connexion";
+
+      if (error && typeof error === "object" && "code" in error) {
+        const firebaseError = error as { code: string; message?: string };
+        const errorMap: Record<string, string> = {
+          "auth/user-not-found": "Cet email n'existe pas. Créez d'abord un compte.",
+          "auth/wrong-password": "Mot de passe incorrect",
+          "auth/invalid-email": "Email invalide",
+          "auth/user-disabled": "Ce compte a été désactivé",
+          "auth/network-request-failed": "Erreur de connexion réseau. Vérifiez votre connexion internet.",
+        };
+
+        message = errorMap[firebaseError.code] || firebaseError.message || message;
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
+
       toast.error(message);
     } finally {
       setLoading(false);
