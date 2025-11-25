@@ -15,7 +15,9 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const validateLicenseKey = async (key: string): Promise<{ valid: boolean; plan?: PlanType }> => {
+  const validateLicenseKey = async (
+    key: string,
+  ): Promise<{ valid: boolean; plan?: PlanType }> => {
     if (!key.trim()) {
       return { valid: false };
     }

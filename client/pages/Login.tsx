@@ -116,7 +116,6 @@ export default function Login() {
             Créer un compte
           </Link>
         </div>
-
       </div>
     </div>
   );

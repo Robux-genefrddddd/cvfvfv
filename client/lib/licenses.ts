@@ -1,5 +1,13 @@
 import { db } from "./firebase";
-import { doc, setDoc, collection, getDocs, query, where, updateDoc } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  collection,
+  getDocs,
+  query,
+  where,
+  updateDoc,
+} from "firebase/firestore";
 import { PlanType } from "@/contexts/AuthContext";
 
 export interface LicenseKey {
@@ -41,7 +49,10 @@ export async function deactivateLicense(key: string): Promise<void> {
   await updateDoc(doc(db, "licenses", key), { active: false });
 }
 
-export async function markLicenseAsUsed(key: string, userUid: string): Promise<void> {
+export async function markLicenseAsUsed(
+  key: string,
+  userUid: string,
+): Promise<void> {
   await updateDoc(doc(db, "licenses", key), {
     usedBy: userUid,
     usedAt: Date.now(),
