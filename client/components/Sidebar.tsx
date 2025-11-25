@@ -13,6 +13,7 @@ import { auth } from "@/lib/firebase";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { MessagesService } from "@/lib/messages";
 import {
   Popover,
   PopoverContent,
@@ -29,15 +30,20 @@ import { SettingsModal } from "@/components/SettingsModal";
 import { HelpModal } from "@/components/HelpModal";
 
 interface Conversation {
-  id: number;
+  id: string;
   name: string;
   active: boolean;
   isDeleting?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+  messageCount?: number;
 }
 
 interface SidebarProps {
   isOpen?: boolean;
   onClose?: () => void;
+  activeConversationId?: string;
+  onConversationSelect?: (id: string) => void;
 }
 
 export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
