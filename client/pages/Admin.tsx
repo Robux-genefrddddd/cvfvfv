@@ -415,46 +415,15 @@ export default function Admin() {
 
         {activeTab === "licenses" && (
           <>
-            {/* License Generation Section */}
-            <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-8">
-              <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-6">
-                <Key size={20} />
+            {/* Generate License Button */}
+            <div className="mb-8">
+              <button
+                onClick={() => setShowGenerateLicenseModal(true)}
+                className="px-6 py-3 bg-white/20 hover:bg-white/30 text-white font-semibold rounded-lg border border-white/40 transition-all flex items-center gap-2"
+              >
+                <Plus size={20} />
                 Générer une nouvelle clé
-              </h2>
-
-              <div className="flex flex-col sm:flex-row gap-4">
-                <select
-                  value={selectedPlanForGeneration}
-                  onChange={(e) =>
-                    setSelectedPlanForGeneration(e.target.value as PlanType)
-                  }
-                  className="flex-1 bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white"
-                >
-                  <option value="Free">Free (10 messages)</option>
-                  <option value="Classic">Classic (500 messages/jour)</option>
-                  <option value="Pro">Pro (1000 messages/jour)</option>
-                </select>
-
-                <input
-                  type="number"
-                  min="1"
-                  max="365"
-                  value={validityDaysForGeneration}
-                  onChange={(e) =>
-                    setValidityDaysForGeneration(parseInt(e.target.value) || 1)
-                  }
-                  className="w-24 bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white"
-                  placeholder="Jours"
-                />
-
-                <button
-                  onClick={handleGenerateLicense}
-                  disabled={generatingLicense}
-                  className="px-6 py-3 bg-white/20 hover:bg-white/30 disabled:opacity-50 text-white font-semibold rounded-lg border border-white/40 transition-all"
-                >
-                  {generatingLicense ? "Génération..." : "Générer"}
-                </button>
-              </div>
+              </button>
             </div>
 
             {/* Licenses Table */}
