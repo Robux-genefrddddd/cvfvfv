@@ -91,6 +91,11 @@ export class SystemNoticesService {
   }
 
   static async unbanUser(userId: string): Promise<void> {
+    if (!userId) {
+      console.warn("unbanUser called with undefined userId");
+      return;
+    }
+
     const q = query(collection(db, "bans"), where("userId", "==", userId));
     const snapshot = await getDocs(q);
 
@@ -100,6 +105,11 @@ export class SystemNoticesService {
   }
 
   static async getUserBan(userId: string): Promise<UserBan | null> {
+    if (!userId) {
+      console.warn("getUserBan called with undefined userId");
+      return null;
+    }
+
     const q = query(collection(db, "bans"), where("userId", "==", userId));
     const snapshot = await getDocs(q);
 
