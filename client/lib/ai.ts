@@ -65,12 +65,13 @@ export class AIService {
         }),
       });
 
+      // Read body once and reuse it
+      const data = await response.json();
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Erreur API");
+        throw new Error(data.error || "Erreur API");
       }
 
-      const data = await response.json();
       return data.content || "Pas de réponse";
     } catch (error) {
       throw error instanceof Error
