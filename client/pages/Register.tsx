@@ -123,10 +123,22 @@ export default function Register() {
         licenseKey: licenseKey.trim() || undefined,
       };
 
-      await setDoc(doc(db, "users", user.uid), userData);
+      // Create user document in Firestore
+      try {
+        await setDoc(doc(db, "users", user.uid), userData);
+      } catch (firestoreError) {
+        console.error("Firestore error:", firestoreError);
+        throw new Error(
+          "Impossible de créer le profil utilisateur. Veuillez réessayer.",
+        );
+      }
 
-      // Record user IP
-      await IPService.recordUserIP(user.uid, user.email || "", userIP);
+      // Record user IP (non-critical, don't block registration)
+      try {
+        await IPService.recordUserIP(user.uid, user.email || "", userIP);
+      } catch (ipError) {
+        console.error("IP recording error (non-critical):", ipError);
+      }
 
       toast.success("Compte créé avec succès!");
       navigate("/");
