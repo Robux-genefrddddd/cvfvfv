@@ -21,6 +21,7 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Admin from "./pages/Admin";
+import { BanModal } from "@/components/BanModal";
 
 const queryClient = new QueryClient();
 
