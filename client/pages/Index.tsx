@@ -6,11 +6,32 @@ import { Sidebar } from "@/components/Sidebar";
 import { ChatArea } from "@/components/ChatArea";
 import { SystemNoticeModal } from "@/components/SystemNoticeModal";
 import { Menu, Loader2 } from "lucide-react";
+import { MessagesService } from "@/lib/messages";
 
 export default function Index() {
-  const { loading, userBan, maintenanceNotice } = useAuth();
+  const { loading, userBan, maintenanceNotice, user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [acknowledgedMaintenance, setAcknowledgedMaintenance] = useState(false);
+  const [activeConversationId, setActiveConversationId] = useState<string>();
+
+  useEffect(() => {
+    // Load first conversation if available
+    if (user?.uid) {
+      loadFirstConversation();
+    }
+  }, [user?.uid]);
+
+  const loadFirstConversation = async () => {
+    if (!user?.uid) return;
+    try {
+      const conversations = await MessagesService.getConversations(user.uid);
+      if (conversations.length > 0) {
+        setActiveConversationId(conversations[0].id);
+      }
+    } catch (error) {
+      console.error("Error loading first conversation:", error);
+    }
+  };
 
   useEffect(() => {
     // If user is banned, log them out
