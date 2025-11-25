@@ -158,9 +158,11 @@ export default function Register() {
         const errorMap: Record<string, string> = {
           "auth/email-already-in-use": "Cet email est déjà utilisé",
           "auth/invalid-email": "Email invalide",
-          "auth/weak-password": "Le mot de passe doit contenir au moins 6 caractères",
+          "auth/weak-password":
+            "Le mot de passe doit contenir au moins 6 caractères",
           "auth/operation-not-allowed": "L'inscription n'est pas autorisée",
-          "auth/network-request-failed": "Erreur de connexion réseau. Vérifiez votre connexion internet.",
+          "auth/network-request-failed":
+            "Erreur de connexion réseau. Vérifiez votre connexion internet.",
         };
 
         if (firebaseError.code) {

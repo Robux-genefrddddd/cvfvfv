@@ -86,8 +86,13 @@ export class AIService {
       const data = await response.json();
       return data.content || "Pas de réponse";
     } catch (error) {
-      if (error instanceof SyntaxError && error.message.includes("body stream")) {
-        throw new Error("Erreur serveur: réponse invalide. Veuillez réessayer.");
+      if (
+        error instanceof SyntaxError &&
+        error.message.includes("body stream")
+      ) {
+        throw new Error(
+          "Erreur serveur: réponse invalide. Veuillez réessayer.",
+        );
       }
 
       throw error instanceof Error

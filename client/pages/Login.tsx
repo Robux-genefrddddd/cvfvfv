@@ -57,13 +57,16 @@ export default function Login() {
 
         // Map Firebase error codes to user-friendly messages
         const errorMap: Record<string, string> = {
-          "auth/user-not-found": "Cet email n'existe pas. Créez d'abord un compte.",
+          "auth/user-not-found":
+            "Cet email n'existe pas. Créez d'abord un compte.",
           "auth/wrong-password": "Mot de passe incorrect",
           "auth/invalid-credential": "Email ou mot de passe incorrect",
           "auth/invalid-email": "Email invalide",
           "auth/user-disabled": "Ce compte a été désactivé",
-          "auth/network-request-failed": "Erreur de connexion réseau. Vérifiez votre connexion internet.",
-          "auth/too-many-requests": "Trop de tentatives de connexion. Veuillez réessayer plus tard.",
+          "auth/network-request-failed":
+            "Erreur de connexion réseau. Vérifiez votre connexion internet.",
+          "auth/too-many-requests":
+            "Trop de tentatives de connexion. Veuillez réessayer plus tard.",
         };
 
         if (firebaseError.code) {

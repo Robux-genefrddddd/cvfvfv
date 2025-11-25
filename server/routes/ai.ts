@@ -51,13 +51,17 @@ export const handleAIChat: RequestHandler = async (req, res) => {
       }
     }
   } catch (error) {
-    console.error("Failed to fetch API key from Firebase, using env variable:", error);
+    console.error(
+      "Failed to fetch API key from Firebase, using env variable:",
+      error,
+    );
   }
 
   if (!apiKey) {
     console.error("OPENROUTER_API_KEY not configured");
     return res.status(500).json({
-      error: "Service d'IA non disponible. Veuillez contacter l'administrateur.",
+      error:
+        "Service d'IA non disponible. Veuillez contacter l'administrateur.",
     });
   }
 

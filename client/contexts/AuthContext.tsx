@@ -10,7 +10,11 @@ import {
 
 export type PlanType = "Free" | "Classic" | "Pro";
 export type UserRole = "user" | "moderator" | "admin";
-export type UserCategory = "individual" | "business" | "organization" | "developer";
+export type UserCategory =
+  | "individual"
+  | "business"
+  | "organization"
+  | "developer";
 
 export interface UserData {
   uid: string;
