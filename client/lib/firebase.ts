@@ -3,8 +3,9 @@ import {
   getAuth,
   setPersistence,
   browserLocalPersistence,
+  connectAuthEmulator,
 } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD7KlxN05OoSCGHwjXhiiYyKF5bOXianLY",
