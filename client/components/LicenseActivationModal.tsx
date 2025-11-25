@@ -35,8 +35,12 @@ export function LicenseActivationModal({
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        toast.error(error.message || "Clé de licence invalide");
+        try {
+          const error = await response.json();
+          toast.error(error.message || "Clé de licence invalide");
+        } catch {
+          toast.error("Clé de licence invalide");
+        }
         return;
       }
 
