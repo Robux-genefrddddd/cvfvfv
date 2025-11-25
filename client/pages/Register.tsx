@@ -133,8 +133,10 @@ export default function Register() {
     } catch (error) {
       let message = "Erreur d'inscription";
 
-      if (error && typeof error === "object" && "code" in error) {
-        const firebaseError = error as { code: string; message?: string };
+      if (error && typeof error === "object") {
+        const firebaseError = error as { code?: string; message?: string };
+
+        // Map Firebase error codes to user-friendly messages
         const errorMap: Record<string, string> = {
           "auth/email-already-in-use": "Cet email est déjà utilisé",
           "auth/invalid-email": "Email invalide",
@@ -143,7 +145,20 @@ export default function Register() {
           "auth/network-request-failed": "Erreur de connexion réseau. Vérifiez votre connexion internet.",
         };
 
-        message = errorMap[firebaseError.code] || firebaseError.message || message;
+        if (firebaseError.code) {
+          message = errorMap[firebaseError.code] || firebaseError.code;
+        } else if (firebaseError.message) {
+          // Handle cases where Firebase returns a message instead of code
+          if (firebaseError.message.includes("EMAIL_EXISTS")) {
+            message = "Cet email est déjà utilisé";
+          } else if (firebaseError.message.includes("WEAK_PASSWORD")) {
+            message = "Le mot de passe doit contenir au moins 6 caractères";
+          } else if (firebaseError.message.includes("INVALID_EMAIL")) {
+            message = "Email invalide";
+          } else {
+            message = firebaseError.message;
+          }
+        }
       } else if (error instanceof Error) {
         message = error.message;
       }
