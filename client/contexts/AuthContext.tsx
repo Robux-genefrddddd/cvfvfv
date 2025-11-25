@@ -41,6 +41,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userBan, setUserBan] = useState<UserBan | null>(null);
+  const [maintenanceNotice, setMaintenanceNotice] = useState<MaintenanceNotice | null>(null);
 
   useEffect(() => {
     let isMounted = true;
