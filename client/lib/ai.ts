@@ -49,42 +49,29 @@ export class AIService {
     const config = await this.getConfig();
 
     try {
-      const response = await fetch(
-        "https://openrouter.ai/api/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${config.apiKey}`,
-            "Content-Type": "application/json",
-            "HTTP-Referer": window.location.origin,
-            "X-Title": "Chat AI",
-          },
-          body: JSON.stringify({
-            model: config.model,
-            messages: [
-              {
-                role: "system",
-                content: config.systemPrompt,
-              },
-              ...conversationHistory,
-              {
-                role: "user",
-                content: userMessage,
-              },
-            ],
-            temperature: config.temperature,
-            max_tokens: config.maxTokens,
-          }),
+      // Call backend endpoint instead of directly calling OpenRouter
+      const response = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          userMessage,
+          conversationHistory,
+          model: config.model,
+          temperature: config.temperature,
+          maxTokens: config.maxTokens,
+          systemPrompt: config.systemPrompt,
+        }),
+      });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error?.message || "Erreur API OpenRouter");
+        throw new Error(error.error || "Erreur API");
       }
 
       const data = await response.json();
-      return data.choices[0]?.message?.content || "Pas de réponse";
+      return data.content || "Pas de réponse";
     } catch (error) {
       throw error instanceof Error
         ? error
