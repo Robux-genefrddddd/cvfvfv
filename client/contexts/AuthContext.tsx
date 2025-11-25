@@ -20,6 +20,8 @@ export interface UserData {
   createdAt: number;
   isAdmin: boolean;
   licenseKey?: string;
+  licenseExpiresAt?: number;
+  lastMessageReset?: number;
 }
 
 interface AuthContextType {
@@ -78,7 +80,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (!isMounted) return;
 
           if (userDocSnap.exists()) {
-            setUserData(userDocSnap.data() as UserData);
+            const userData = userDocSnap.data() as UserData;
+
+            // Check if we need to reset messages for daily limit
+            if (userData.licenseKey && userData.lastMessageReset && userData.plan !== "Free") {
+              const now = Date.now();
+              const lastResetDate = new Date(userData.lastMessageReset).toDateString();
+              const todayDate = new Date(now).toDateString();
+
+              if (lastResetDate !== todayDate && userData.licenseExpiresAt && userData.licenseExpiresAt > now) {
+                // Reset messages for the new day
+                await updateDoc(userDocRef, {
+                  messagesUsed: 0,
+                  lastMessageReset: now,
+                });
+                userData.messagesUsed = 0;
+                userData.lastMessageReset = now;
+              }
+            }
+
+            // Check if license has expired
+            if (userData.licenseExpiresAt && userData.licenseExpiresAt <= Date.now()) {
+              // License expired, reset to Free plan
+              await updateDoc(userDocRef, {
+                plan: "Free",
+                messagesLimit: 10,
+                messagesUsed: 0,
+                licenseKey: "",
+                licenseExpiresAt: null,
+              });
+              userData.plan = "Free";
+              userData.messagesLimit = 10;
+              userData.messagesUsed = 0;
+              userData.licenseKey = "";
+              userData.licenseExpiresAt = undefined;
+            }
+
+            setUserData(userData);
           } else {
             // Initialize new user with Free plan
             const newUserData: UserData = {
