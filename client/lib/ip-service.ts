@@ -187,19 +187,21 @@ export class IPService {
     try {
       const banRef = doc(collection(db, "ip_bans"));
       const bannedAt = Timestamp.now();
-      const expiresAt = durationMinutes
-        ? Timestamp.fromDate(
-            new Date(bannedAt.toDate().getTime() + durationMinutes * 60000),
-          )
-        : undefined;
 
-      await setDoc(banRef, {
+      const banData: any = {
         ipAddress,
         reason,
         bannedAt,
-        expiresAt,
         isPermanent: !durationMinutes,
-      } as IPBan);
+      };
+
+      if (durationMinutes) {
+        banData.expiresAt = Timestamp.fromDate(
+          new Date(bannedAt.toDate().getTime() + durationMinutes * 60000),
+        );
+      }
+
+      await setDoc(banRef, banData as IPBan);
     } catch (error) {
       console.error("Error banning IP:", error);
     }
