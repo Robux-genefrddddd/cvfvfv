@@ -59,6 +59,12 @@ export default function AdminBanManagement({ users }: AdminBanManagementProps) {
         return;
       }
 
+      if (!user.uid) {
+        toast.error("Cet utilisateur n'a pas d'ID valide");
+        setSavingBan(false);
+        return;
+      }
+
       if (actionType === "ban") {
         await SystemNoticesService.banUser(
           user.uid,
