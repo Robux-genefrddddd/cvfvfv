@@ -38,11 +38,6 @@ export default function Login() {
       <div className="relative w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8 animate-fadeIn">
-          <div className="flex justify-center mb-4">
-            <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center border-2 border-white/30">
-              <LogIn size={24} className="text-white" />
-            </div>
-          </div>
           <h1 className="text-3xl font-bold text-white mb-2">Bienvenue</h1>
           <p className="text-foreground/60">Connectez-vous à votre compte</p>
         </div>
