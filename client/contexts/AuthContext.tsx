@@ -96,7 +96,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
 
             // Check if license has expired
-            if (userData.licenseExpiresAt && userData.licenseExpiresAt <= Date.now()) {
+            if (
+              userData.licenseExpiresAt &&
+              userData.licenseExpiresAt <= Date.now()
+            ) {
               // License expired, reset to Free plan
               await updateDoc(userDocRef, {
                 plan: "Free",

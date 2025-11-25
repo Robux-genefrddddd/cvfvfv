@@ -2,11 +2,7 @@ import { useState } from "react";
 import { X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { PlanType } from "@/contexts/AuthContext";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { generateLicenseKey } from "@/lib/licenses";
 
 interface GenerateLicenseModalProps {
@@ -59,13 +55,13 @@ export function GenerateLicenseModal({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="border border-gray-800 rounded-lg p-0 bg-black shadow-xl max-w-md">
-        <DialogTitle className="sr-only">Générer une clé de licence</DialogTitle>
-        
+        <DialogTitle className="sr-only">
+          Générer une clé de licence
+        </DialogTitle>
+
         <div className="space-y-6 p-8">
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-white">
-              Générer une clé
-            </h2>
+            <h2 className="text-2xl font-bold text-white">Générer une clé</h2>
             <p className="text-sm text-gray-400">
               Sélectionnez un plan et une durée
             </p>
@@ -87,9 +83,7 @@ export function GenerateLicenseModal({
                       : "border-gray-700 bg-gray-900 text-gray-400 hover:border-gray-600"
                   }`}
                 >
-                  <span className="font-semibold">
-                    {plan}
-                  </span>
+                  <span className="font-semibold">{plan}</span>
                   <span className="text-xs block mt-1">
                     {plan === "Free" && "10 messages"}
                     {plan === "Classic" && "500 messages/jour"}

@@ -30,11 +30,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { UserData, PlanType } from "@/contexts/AuthContext";
-import {
-  getAllLicenses,
-  deactivateLicense,
-  LicenseKey,
-} from "@/lib/licenses";
+import { getAllLicenses, deactivateLicense, LicenseKey } from "@/lib/licenses";
 import { AIService, AIConfig } from "@/lib/ai";
 import {
   SystemNoticesService,

@@ -28,7 +28,7 @@ export async function handleDailyReset(req: Request, res: Response) {
       {
         method: "GET",
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
 
     if (!userResponse.ok) {
@@ -77,11 +77,14 @@ export async function handleDailyReset(req: Request, res: Response) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(updateQuery),
-        }
+        },
       );
 
       if (!updateResponse.ok) {
-        console.error("Error updating expired license:", await updateResponse.text());
+        console.error(
+          "Error updating expired license:",
+          await updateResponse.text(),
+        );
       }
 
       return res.status(200).json({
@@ -119,11 +122,14 @@ export async function handleDailyReset(req: Request, res: Response) {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(resetQuery),
-          }
+          },
         );
 
         if (!resetResponse.ok) {
-          console.error("Error resetting messages:", await resetResponse.text());
+          console.error(
+            "Error resetting messages:",
+            await resetResponse.text(),
+          );
         }
 
         const messageLimit = extractValue(userData.messagesLimit) || 500;

@@ -50,7 +50,7 @@ export async function handleActivateLicense(req: Request, res: Response) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(query),
-      }
+      },
     );
 
     if (!response.ok) {
@@ -140,11 +140,14 @@ export async function handleActivateLicense(req: Request, res: Response) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userUpdateQuery),
-      }
+      },
     );
 
     if (!userUpdateResponse.ok) {
-      console.error("Error updating user data:", await userUpdateResponse.text());
+      console.error(
+        "Error updating user data:",
+        await userUpdateResponse.text(),
+      );
     }
 
     // Update the license key with usage info (but keep it active for daily resets)
@@ -168,7 +171,7 @@ export async function handleActivateLicense(req: Request, res: Response) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(licenseSyncQuery),
-      }
+      },
     );
 
     if (!licenseSyncResponse.ok) {

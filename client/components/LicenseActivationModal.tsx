@@ -3,11 +3,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 interface LicenseActivationModalProps {
   isOpen: boolean;
@@ -86,15 +82,11 @@ export function LicenseActivationModal({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="border border-gray-800 rounded-lg p-0 bg-black shadow-xl">
-        <DialogTitle className="sr-only">
-          Activer une Licence
-        </DialogTitle>
+        <DialogTitle className="sr-only">Activer une Licence</DialogTitle>
         {success ? (
           <div className="flex flex-col items-center justify-center py-12 px-8 space-y-6">
             <div className="text-center space-y-2">
-              <p className="text-2xl font-bold text-white">
-                Licence activée!
-              </p>
+              <p className="text-2xl font-bold text-white">Licence activée!</p>
               <p className="text-sm text-gray-400">
                 Votre plan a été mis à jour avec succès.
               </p>
@@ -110,7 +102,8 @@ export function LicenseActivationModal({
                 Activer une Licence
               </h2>
               <p className="text-sm text-gray-400">
-                Entrez votre clé de licence pour accéder à toutes les fonctionnalités
+                Entrez votre clé de licence pour accéder à toutes les
+                fonctionnalités
               </p>
             </div>
 
@@ -137,7 +130,8 @@ export function LicenseActivationModal({
 
             <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
               <p className="text-xs text-gray-400">
-                Vous n'avez pas de clé? Contactez l'administrateur pour obtenir une licence.
+                Vous n'avez pas de clé? Contactez l'administrateur pour obtenir
+                une licence.
               </p>
             </div>
 
