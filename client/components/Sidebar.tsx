@@ -13,6 +13,7 @@ import { auth } from "@/lib/firebase";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { MessagesService } from "@/lib/messages";
 import {
   Popover,
   PopoverContent,
@@ -29,24 +30,33 @@ import { SettingsModal } from "@/components/SettingsModal";
 import { HelpModal } from "@/components/HelpModal";
 
 interface Conversation {
-  id: number;
+  id: string;
   name: string;
   active: boolean;
   isDeleting?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+  messageCount?: number;
 }
 
 interface SidebarProps {
   isOpen?: boolean;
   onClose?: () => void;
+  activeConversationId?: string;
+  onConversationSelect?: (id: string) => void;
 }
 
-export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
+export function Sidebar({
+  isOpen = true,
+  onClose,
+  activeConversationId,
+  onConversationSelect,
+}: SidebarProps) {
   const { user, userData, loading } = useAuth();
   const navigate = useNavigate();
-  const [conversations, setConversations] = useState<Conversation[]>([
-    { id: 1, name: "Nouvelle conversation", active: true },
-  ]);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [loadingConversations, setLoadingConversations] = useState(true);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -58,14 +68,66 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   const messagesUsed = userData?.messagesUsed || 0;
   const messagesLimit = userData?.messagesLimit || 10;
 
-  const handleNewConversation = () => {
-    const newId = Math.max(...conversations.map((c) => c.id), 0) + 1;
-    const newConversation: Conversation = {
-      id: newId,
-      name: `Conversation ${newId}`,
-      active: true,
-    };
-    setConversations([...conversations, newConversation]);
+  useEffect(() => {
+    if (user?.uid) {
+      loadConversations();
+    }
+  }, [user?.uid]);
+
+  const loadConversations = async () => {
+    if (!user?.uid) return;
+    try {
+      setLoadingConversations(true);
+      const fbConversations = await MessagesService.getConversations(user.uid);
+      setConversations(
+        fbConversations.map((conv) => ({
+          id: conv.id,
+          name: conv.title,
+          active: conv.id === activeConversationId,
+          createdAt: conv.createdAt.toDate(),
+          updatedAt: conv.updatedAt.toDate(),
+          messageCount: conv.messageCount,
+        })),
+      );
+    } catch (error) {
+      console.error("Error loading conversations:", error);
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+        if (error.message.includes("Failed to fetch")) {
+          toast.error("Erreur réseau. Vérifiez votre connexion.");
+        } else {
+          toast.error("Erreur lors du chargement des conversations");
+        }
+      } else {
+        toast.error("Erreur lors du chargement des conversations");
+      }
+    } finally {
+      setLoadingConversations(false);
+    }
+  };
+
+  const handleNewConversation = async () => {
+    if (!user?.uid) return;
+    try {
+      const conversationRef = await MessagesService.createConversation(
+        user.uid,
+        "Nouvelle conversation",
+      );
+      const newConversation: Conversation = {
+        id: conversationRef.id,
+        name: "Nouvelle conversation",
+        active: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        messageCount: 0,
+      };
+      setConversations([newConversation, ...conversations]);
+      onConversationSelect?.(conversationRef.id);
+      toast.success("Conversation créée");
+    } catch (error) {
+      console.error("Error creating conversation:", error);
+      toast.error("Erreur lors de la création de la conversation");
+    }
   };
 
   const handleLogout = async () => {
@@ -81,42 +143,61 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   const handleSyncMessages = async () => {
     setIsSyncing(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await loadConversations();
       toast.success("Messages synchronisés");
     } catch (error) {
+      console.error("Error syncing conversations:", error);
       toast.error("Erreur de synchronisation");
     } finally {
       setIsSyncing(false);
     }
   };
 
-  const handleDeleteConversation = (id: number) => {
+  const handleDeleteConversation = async (id: string) => {
     setConversations(
       conversations.map((c) => (c.id === id ? { ...c, isDeleting: true } : c)),
     );
-    setTimeout(() => {
-      setConversations((prev) => prev.filter((c) => c.id !== id));
-      setEditingId(null);
+    setTimeout(async () => {
+      try {
+        await MessagesService.deleteConversation(id);
+        setConversations((prev) => prev.filter((c) => c.id !== id));
+        setEditingId(null);
+        toast.success("Conversation supprimée");
+      } catch (error) {
+        console.error("Error deleting conversation:", error);
+        toast.error("Erreur lors de la suppression");
+        await loadConversations();
+      }
     }, 300);
   };
 
-  const handleEditConversation = (id: number, currentName: string) => {
+  const handleEditConversation = (id: string, currentName: string) => {
     setEditingId(id);
     setEditName(currentName);
     setIsDialogOpen(true);
   };
 
-  const handleSaveEdit = () => {
-    if (editingId && editName.trim()) {
+  const handleSaveEdit = async () => {
+    if (!editingId || !editName.trim()) return;
+
+    try {
+      await MessagesService.updateConversation(editingId, {
+        title: editName,
+      });
       setConversations(
         conversations.map((c) =>
           c.id === editingId ? { ...c, name: editName } : c,
         ),
       );
+      toast.success("Conversation mise à jour");
+    } catch (error) {
+      console.error("Error updating conversation:", error);
+      toast.error("Erreur lors de la mise à jour");
+    } finally {
+      setIsDialogOpen(false);
+      setEditingId(null);
+      setEditName("");
     }
-    setIsDialogOpen(false);
-    setEditingId(null);
-    setEditName("");
   };
 
   return (
@@ -242,22 +323,15 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
               >
                 <div
                   className={`flex items-center gap-2 px-2 py-2 rounded-lg border-2 transition-all ${
-                    conv.active
+                    conv.id === activeConversationId
                       ? "bg-white/10 border-white"
                       : "border-white/30 hover:border-white/60"
                   }`}
                 >
                   <button
-                    onClick={() =>
-                      setConversations(
-                        conversations.map((c) => ({
-                          ...c,
-                          active: c.id === conv.id,
-                        })),
-                      )
-                    }
+                    onClick={() => onConversationSelect?.(conv.id)}
                     className={`flex-1 text-left text-sm transition-all py-1 px-2 rounded ${
-                      conv.active
+                      conv.id === activeConversationId
                         ? "text-foreground"
                         : "text-foreground/70 hover:text-foreground"
                     }`}

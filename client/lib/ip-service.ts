@@ -205,6 +205,10 @@ export class IPService {
     reason: string,
     durationMinutes?: number,
   ): Promise<void> {
+    if (!ipAddress || !reason) {
+      throw new Error("Missing required fields: ipAddress or reason");
+    }
+
     try {
       const banRef = doc(collection(db, "ip_bans"));
       const bannedAt = Timestamp.now();
@@ -225,6 +229,7 @@ export class IPService {
       await setDoc(banRef, banData as IPBan);
     } catch (error) {
       console.error("Error banning IP:", error);
+      throw error;
     }
   }
 

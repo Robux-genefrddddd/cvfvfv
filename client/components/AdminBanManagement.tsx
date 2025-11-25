@@ -38,6 +38,7 @@ export default function AdminBanManagement({ users }: AdminBanManagementProps) {
       const allIPBans = await IPService.getAllIPBans();
       setIPBans(allIPBans);
     } catch (error) {
+      console.error("Error loading bans:", error);
       toast.error("Erreur lors du chargement des bans");
     } finally {
       setLoading(false);
@@ -55,6 +56,12 @@ export default function AdminBanManagement({ users }: AdminBanManagementProps) {
       const user = users.find((u) => u.email === userEmailToBan);
       if (!user) {
         toast.error("Utilisateur non trouvé");
+        setSavingBan(false);
+        return;
+      }
+
+      if (!user.uid) {
+        toast.error("Cet utilisateur n'a pas d'ID valide");
         setSavingBan(false);
         return;
       }
@@ -82,7 +89,10 @@ export default function AdminBanManagement({ users }: AdminBanManagementProps) {
       setBanDuration(null);
       await loadBans();
     } catch (error) {
-      toast.error("Erreur lors de l'action");
+      console.error("Error in handleBanUser:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Erreur lors de l'action";
+      toast.error(errorMessage);
     } finally {
       setSavingBan(false);
     }
@@ -94,7 +104,10 @@ export default function AdminBanManagement({ users }: AdminBanManagementProps) {
       toast.success("Utilisateur débanni");
       await loadBans();
     } catch (error) {
-      toast.error("Erreur lors du déban");
+      console.error("Error in handleUnbanUser:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Erreur lors du déban";
+      toast.error(errorMessage);
     }
   };
 
@@ -118,7 +131,10 @@ export default function AdminBanManagement({ users }: AdminBanManagementProps) {
       setBanIPDuration(null);
       await loadBans();
     } catch (error) {
-      toast.error("Erreur lors du ban IP");
+      console.error("Error in handleBanIP:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Erreur lors du ban IP";
+      toast.error(errorMessage);
     } finally {
       setSavingIPBan(false);
     }
@@ -130,7 +146,10 @@ export default function AdminBanManagement({ users }: AdminBanManagementProps) {
       toast.success("Adresse IP débanni");
       await loadBans();
     } catch (error) {
-      toast.error("Erreur lors du déban IP");
+      console.error("Error in handleUnbanIP:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Erreur lors du déban IP";
+      toast.error(errorMessage);
     }
   };
 
@@ -200,9 +219,9 @@ export default function AdminBanManagement({ users }: AdminBanManagementProps) {
                 placeholder="user@example.com"
               />
               <datalist id="user-emails">
-                {users.map((user) => (
-                  <option key={user.uid} value={user.email} />
-                ))}
+                {users?.map?.((user, index) => (
+                  <option key={index} value={user.email} />
+                )) || []}
               </datalist>
             </div>
 
@@ -339,7 +358,7 @@ export default function AdminBanManagement({ users }: AdminBanManagementProps) {
             ) : (
               userBans.map((ban) => (
                 <div
-                  key={ban.id}
+                  key={`ban-${ban.id}`}
                   className="bg-red-500/10 border border-red-500/20 rounded-lg p-3"
                 >
                   <p className="text-xs text-white font-medium truncate">
@@ -377,7 +396,7 @@ export default function AdminBanManagement({ users }: AdminBanManagementProps) {
             ) : (
               warns.map((warn) => (
                 <div
-                  key={warn.id}
+                  key={`warn-${warn.id}`}
                   className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3"
                 >
                   <p className="text-xs text-white font-medium truncate">
@@ -409,7 +428,7 @@ export default function AdminBanManagement({ users }: AdminBanManagementProps) {
             ) : (
               ipBans.map((ban) => (
                 <div
-                  key={ban.id}
+                  key={`ip-ban-${ban.id}`}
                   className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-3"
                 >
                   <p className="text-xs text-white font-mono font-medium truncate">

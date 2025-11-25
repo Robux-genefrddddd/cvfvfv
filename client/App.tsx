@@ -21,11 +21,12 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Admin from "./pages/Admin";
+import { BanModal } from "@/components/BanModal";
 
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ element }: { element: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading, userBan } = useAuth();
 
   if (loading) {
     return (
@@ -33,6 +34,10 @@ function ProtectedRoute({ element }: { element: React.ReactNode }) {
         <Loader2 className="w-8 h-8 animate-spin text-white" />
       </div>
     );
+  }
+
+  if (user && userBan && userBan.type === "ban") {
+    return <BanModal ban={userBan} />;
   }
 
   return user ? element : <Navigate to="/login" replace />;

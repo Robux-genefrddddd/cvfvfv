@@ -42,6 +42,10 @@ export class SystemNoticesService {
     reason: string,
     durationMinutes?: number,
   ): Promise<void> {
+    if (!userId || !email || !reason) {
+      throw new Error("Missing required fields: userId, email, or reason");
+    }
+
     const banRef = doc(collection(db, "bans"));
     const bannedAt = Timestamp.now();
 
@@ -69,6 +73,10 @@ export class SystemNoticesService {
     reason: string,
     durationMinutes?: number,
   ): Promise<void> {
+    if (!userId || !email || !reason) {
+      throw new Error("Missing required fields: userId, email, or reason");
+    }
+
     const banRef = doc(collection(db, "bans"));
     const bannedAt = Timestamp.now();
 

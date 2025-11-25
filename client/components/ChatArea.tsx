@@ -35,20 +35,70 @@ interface ChatMessage {
   timestamp: number;
 }
 
-export function ChatArea() {
+interface ChatAreaProps {
+  conversationId?: string;
+}
+
+export function ChatArea({ conversationId }: ChatAreaProps) {
   const { user, userData } = useAuth();
   const [message, setMessage] = useState("");
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingMessages, setLoadingMessages] = useState(false);
+
+  useEffect(() => {
+    if (conversationId && user?.uid) {
+      loadMessages();
+    }
+  }, [conversationId, user?.uid]);
+
+  const loadMessages = async () => {
+    if (!conversationId) return;
+    try {
+      setLoadingMessages(true);
+      const fbMessages = await MessagesService.getMessages(conversationId);
+      const messages: ChatMessage[] = fbMessages.map((msg) => ({
+        id: msg.id,
+        role: msg.text.startsWith("user:") ? "user" : "assistant",
+        content: msg.text.replace(/^(user:|assistant:)/, ""),
+        timestamp: msg.createdAt.toDate().getTime(),
+      }));
+      setChatMessages(messages);
+    } catch (error) {
+      console.error("Error loading messages:", error);
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+        if (error.message.includes("Failed to fetch")) {
+          toast.error("Erreur réseau. Vérifiez votre connexion.");
+        } else {
+          toast.error("Erreur lors du chargement des messages");
+        }
+      } else {
+        toast.error("Erreur lors du chargement des messages");
+      }
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
 
   const handleSend = async () => {
-    if (!message.trim() || !user || !userData) return;
+    if (!message.trim() || !user || !userData || !conversationId) return;
 
     // Check message limit
     if (userData.messagesUsed >= userData.messagesLimit) {
-      toast.error("Limite de messages atteinte. Améliorez votre plan.");
+      toast.error(
+        "Limite de messages atteinte. Vous serez redirigé pour activer une licence.",
+      );
       return;
+    }
+
+    // Warn when getting close to limit (90%)
+    const percentUsed = (userData.messagesUsed / userData.messagesLimit) * 100;
+    if (percentUsed >= 90) {
+      toast.warning(
+        `Attention: ${userData.messagesLimit - userData.messagesUsed} messages restants`,
+      );
     }
 
     const userMessageText = message;
@@ -64,6 +114,13 @@ export function ChatArea() {
         timestamp: Date.now(),
       };
       setChatMessages((prev) => [...prev, userMsg]);
+
+      // Save user message to Firebase
+      await MessagesService.addMessage(
+        conversationId,
+        user.uid,
+        `user:${userMessageText}`,
+      );
 
       // Get AI response
       const conversationHistory = chatMessages.map((msg) => ({
@@ -85,12 +142,20 @@ export function ChatArea() {
       };
       setChatMessages((prev) => [...prev, assistantMsg]);
 
+      // Save assistant message to Firebase
+      await MessagesService.addMessage(
+        conversationId,
+        user.uid,
+        `assistant:${aiResponse}`,
+      );
+
       // Update message count in Firebase
       await MessagesService.updateUserMessageCount(
         user.uid,
         userData.messagesUsed + 1,
       );
     } catch (error) {
+      console.error("Error sending message:", error);
       toast.error(
         error instanceof Error ? error.message : "Erreur lors de l'envoi",
       );
@@ -108,10 +173,37 @@ export function ChatArea() {
     <div id="chat-area" className="flex-1 flex flex-col bg-background">
       {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto flex flex-col p-6 animate-fadeIn">
-        {chatMessages.length === 0 ? (
+        {!conversationId ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
-              {/* Placeholder for empty state */}
+              <div
+                className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center border-2 border-foreground/20 animate-scaleIn"
+                style={{
+                  backgroundImage:
+                    "url(https://cdn.builder.io/api/v1/image/assets%2Fafa67d28f8874020a08a6dc1ed05801d%2F340d671f0c4b45db8b30096668d2bc7c)",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "center",
+                  backgroundSize: "cover",
+                }}
+              />
+              <h2 className="text-lg font-semibold text-foreground mb-2 animate-slideUp">
+                Sélectionnez une conversation
+              </h2>
+              <p
+                className="text-sm text-foreground/60 animate-slideUp"
+                style={{ animationDelay: "0.1s" }}
+              >
+                Cliquez sur une conversation à gauche pour commencer
+              </p>
+            </div>
+          </div>
+        ) : loadingMessages ? (
+          <div className="flex-1 flex items-center justify-center">
+            <Loader2 className="w-8 h-8 animate-spin text-foreground/50" />
+          </div>
+        ) : chatMessages.length === 0 ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
               <div
                 className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center border-2 border-foreground/20 animate-scaleIn"
                 style={{
@@ -170,7 +262,9 @@ export function ChatArea() {
         className="px-6 py-6 animate-slideUp"
         style={{ animationDelay: "0.2s" }}
       >
-        <div className="flex items-center gap-3 border-2 border-white rounded-2xl px-4 py-3 bg-background/50 hover:border-white/80 transition-colors group">
+        <div
+          className={`flex items-center gap-3 border-2 border-white rounded-2xl px-4 py-3 bg-background/50 transition-colors group ${!conversationId ? "opacity-50 cursor-not-allowed" : "hover:border-white/80"}`}
+        >
           <input
             id="message-input"
             type="text"
@@ -182,8 +276,11 @@ export function ChatArea() {
                 handleSend();
               }
             }}
-            placeholder="Message..."
-            className="flex-1 bg-transparent text-foreground placeholder-foreground/50 focus:outline-none text-sm leading-relaxed"
+            disabled={!conversationId || loading}
+            placeholder={
+              conversationId ? "Message..." : "Sélectionnez une conversation..."
+            }
+            className="flex-1 bg-transparent text-foreground placeholder-foreground/50 focus:outline-none text-sm leading-relaxed disabled:opacity-50"
           />
 
           {/* Emoji Picker */}

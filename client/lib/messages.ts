@@ -50,15 +50,19 @@ export class MessagesService {
     const q = query(
       collection(db, "conversations"),
       where("userId", "==", userId),
-      orderBy("updatedAt", "desc"),
     );
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => ({
+    const conversations = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
       createdAt: doc.data().createdAt as Timestamp,
       updatedAt: doc.data().updatedAt as Timestamp,
     })) as Conversation[];
+
+    // Sort by updatedAt descending in memory
+    return conversations.sort(
+      (a, b) => b.updatedAt.toDate().getTime() - a.updatedAt.toDate().getTime(),
+    );
   }
 
   static async deleteConversation(conversationId: string): Promise<void> {
@@ -109,15 +113,19 @@ export class MessagesService {
     const q = query(
       collection(db, "messages"),
       where("conversationId", "==", conversationId),
-      orderBy("createdAt", "asc"),
     );
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => ({
+    const messages = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
       createdAt: doc.data().createdAt as Timestamp,
       updatedAt: doc.data().updatedAt as Timestamp,
     })) as Message[];
+
+    // Sort by createdAt ascending in memory
+    return messages.sort(
+      (a, b) => a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime(),
+    );
   }
 
   static async deleteMessage(messageId: string): Promise<void> {
