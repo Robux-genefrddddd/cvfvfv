@@ -91,7 +91,16 @@ export function Sidebar({
       );
     } catch (error) {
       console.error("Error loading conversations:", error);
-      toast.error("Erreur lors du chargement des conversations");
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+        if (error.message.includes("Failed to fetch")) {
+          toast.error("Erreur réseau. Vérifiez votre connexion.");
+        } else {
+          toast.error("Erreur lors du chargement des conversations");
+        }
+      } else {
+        toast.error("Erreur lors du chargement des conversations");
+      }
     } finally {
       setLoadingConversations(false);
     }
