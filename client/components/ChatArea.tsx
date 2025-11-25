@@ -47,8 +47,34 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
   const [loading, setLoading] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
 
+  useEffect(() => {
+    if (conversationId && user?.uid) {
+      loadMessages();
+    }
+  }, [conversationId, user?.uid]);
+
+  const loadMessages = async () => {
+    if (!conversationId) return;
+    try {
+      setLoadingMessages(true);
+      const fbMessages = await MessagesService.getMessages(conversationId);
+      const messages: ChatMessage[] = fbMessages.map((msg) => ({
+        id: msg.id,
+        role: msg.text.startsWith("user:") ? "user" : "assistant",
+        content: msg.text.replace(/^(user:|assistant:)/, ""),
+        timestamp: msg.createdAt.toDate().getTime(),
+      }));
+      setChatMessages(messages);
+    } catch (error) {
+      console.error("Error loading messages:", error);
+      toast.error("Erreur lors du chargement des messages");
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
+
   const handleSend = async () => {
-    if (!message.trim() || !user || !userData) return;
+    if (!message.trim() || !user || !userData || !conversationId) return;
 
     // Check message limit
     if (userData.messagesUsed >= userData.messagesLimit) {
@@ -70,6 +96,13 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
       };
       setChatMessages((prev) => [...prev, userMsg]);
 
+      // Save user message to Firebase
+      await MessagesService.addMessage(
+        conversationId,
+        user.uid,
+        `user:${userMessageText}`,
+      );
+
       // Get AI response
       const conversationHistory = chatMessages.map((msg) => ({
         role: msg.role,
@@ -90,12 +123,20 @@ export function ChatArea({ conversationId }: ChatAreaProps) {
       };
       setChatMessages((prev) => [...prev, assistantMsg]);
 
+      // Save assistant message to Firebase
+      await MessagesService.addMessage(
+        conversationId,
+        user.uid,
+        `assistant:${aiResponse}`,
+      );
+
       // Update message count in Firebase
       await MessagesService.updateUserMessageCount(
         user.uid,
         userData.messagesUsed + 1,
       );
     } catch (error) {
+      console.error("Error sending message:", error);
       toast.error(
         error instanceof Error ? error.message : "Erreur lors de l'envoi",
       );
