@@ -168,7 +168,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
         </div>
 
         {/* Conversations List */}
-        <div className="flex-1 overflow-y-auto p-4">
+        <div id="conversations-list" className="flex-1 overflow-y-auto p-4">
           <div className="space-y-2">
             {conversations.map((conv, idx) => (
               <div
