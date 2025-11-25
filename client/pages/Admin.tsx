@@ -75,6 +75,7 @@ export default function Admin() {
   >("warning");
   const [savingBan, setSavingBan] = useState(false);
   const [savingMaintenance, setSavingMaintenance] = useState(false);
+  const [actionType, setActionType] = useState<"ban" | "warn">("ban");
 
   const planLimits: Record<PlanType, number> = {
     Free: 10,
